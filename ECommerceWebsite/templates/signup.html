@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}SignUp{% endblock title %}
+{% block content %}
+<div class="card p-4 pr-5 pl-5 position-absolute top-50 start-50 translate-middle" style="max-width: 390px; max-height: 80vh; width:95%">
+  
+  <form action ="/auth/signup/" method ="post" >{% csrf_token %}
+
+         <h3 class="text-dark mb-0">SIGNUP</h3>
+          
+          <label for="email" class="fw-light text-start d-block" >Email </label>
+          <div class="form-group">
+          <input type="email" class="form-control " id="email" name="email" required>
+          </div>
+
+          <label for="pass1" class="fw-light text-start d-block" >Password</label>
+          <div class="form-group">
+            <input type="password" class="form-control" id="pass1" name="pass1"  required>
+          </div>
+
+          <label for="pass2" class="fw-light text-start d-block" >Confirm Password</label>
+          <div class="form-group">
+             <input type="password" class="form-control" id="pass2" name="pass2" required>
+          </div>
+          <button type="submit" class="btn btn-outline-dark  fw-normal">SignIn</button>
+    
+        <p class="text-dark fs-5 fw-light">
+          Already User? <a href="/auth/login/" class="text-danger">Login </a>
+        </p>
+
+      </form>
+       {% for message in messages %}
+       <div class="alert alert-{{message.tags}} alert-dismissable fade show fw-light p-1" style="max-width: 330px; " role="alert" >
+        <strong>{{message}}</strong>
+        
+       </div>
+       {% endfor %}
+</div>
+
+
+
+       
+
+{% endblock content %} 
