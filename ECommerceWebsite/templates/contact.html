@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %} E-commerce Contact
+
+{% endblock title %} 
+{% block content %}
+ <div class="container d-flex justify-content-center align-items-center 
+ min-vh-100 ">
+  <div class=" p-5 w-100 bg-transparent">
+    <H1 class="text-center  p-4">Contact Us</H1>
+        
+    <div class="row">
+        <div class="col-md-4"></div>
+        <div class="col-md-4">
+            {% for message in messages %}
+         <div class="alert alert-{{message.tags}}alert-dismissable fade show d-flex justify-content-center fw-light " style="max-width: 330px; " role="alert" >
+         <strong>{{message}}</strong>
+         <button type="button" class="btn-close " data-bs-dismiss="alert" aria-label="Close"></button>
+         </div>
+         {% endfor %}
+          <form action ="/contact/" method ="post" class=" fw-noraml  bg-body-tertiary bg-opacity-25 backdrop-blur p-4 rounded-3">
+           {% csrf_token %}
+
+          <label for="name" class=" text-start d-block"  >Full Name </label>
+          <div class="form-group">
+          <input type="text" class="form-control  " id="name" name="name" value="{{user.name}}" required>
+          </div>
+          <label for="email" class=" text-start d-block" >Email </label>
+          <div class="form-group">
+          <input type="email" class="form-control " id="email" name="email" value="{{user.email}}" required>
+          </div>
+
+          <label for="desc" class=" text-start d-block" >Description</label>
+          <div class="form-group">
+            <textarea type="text" class="form-control " id="desc" name="desc"  required></textarea>
+          </div>
+
+          <label for="phonenbr" class=" text-start d-block" >Phone Number</label>
+          <div class="form-group">
+          <input id="phonenbr" class="form-control  " name="phonenbr" pattern="[6-9][0-9]{9}"maxlength="10"required
+           inputmode="numeric"type="tel">
+          </div>
+
+          <button type="submit" class="btn btn-danger mt-3 fw-normal">Submit</button>
+    
+         <p class="text-white fs-5 fw-light">
+          Already User? <a href="/auth/login/" class="text-danger" >Login </a>
+        </p> 
+
+      </form>
+        </div>
+        <div class="col-md-4"></div>
+    </div>
+  </div>
+  
+
+{% endblock content %}
+
+
+
+
+

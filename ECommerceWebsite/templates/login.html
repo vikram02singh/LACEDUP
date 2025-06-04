@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %} LogIn{% endblock title %}
+
+{% block content %}
+<div class="card p-5 position-absolute top-50 start-50 translate-middle w-100" style="max-width: 330px; width: 95%;">
+  <form action="/auth/login/" method="post">{% csrf_token %}
+    <h3 class="text-dark mb-4">LOGIN</h3>
+
+    <label for="email" class="fw-light text-start d-block">Email</label>
+    <div class="form-group">
+      <input type="email" class="form-control" id="email" name="email" required>
+    </div>
+
+    <br>
+
+    <label for="pass1" class="fw-light text-start d-block">Password</label>
+    <div class="form-group">
+      <input type="password" class="form-control" id="pass1" name="pass1" required>
+    </div>
+
+    <button type="submit" class="btn btn-outline-dark mt-3 fw-normal">LogIn</button>
+
+    <p class="text-dark fs-5 fw-light">
+      New User? <a href="/auth/signup/" class="text-danger">SignUp</a>
+    </p>
+  </form>
+
+  {% for message in messages %}
+  <div class="alert alert-{{message.tags}} alert-dismissible fade show fw-light p-2 w-100 mt-2" role="alert">
+    <strong>{{message}}</strong>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+  {% endfor %}
+</div>
+{% endblock content %}

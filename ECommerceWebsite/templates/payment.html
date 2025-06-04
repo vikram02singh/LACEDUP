@@ -1,0 +1,276 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %} Complete Payment {% endblock title %}
+
+{% block content %}
+<div class="container mt-5 bg-white text-dark  p-4">
+    <h2>Complete your Payment</h2>
+    <p class="text-dark mt-4">Internal Order ID: {{ order_model_id }}</p>
+    <p class="text-success">Razorpay Order ID: {{ order_id }}</p>
+
+    <form id="card-form" class=" mt-4">
+        {% csrf_token %}
+        <div class="mb-3 ">
+            <label for="card_name" class="form-label fw-bold">Name on Card</label>
+            <input type="text" class="form-control" id="card_name" required>
+        </div>
+        <div class="mb-3 ">
+            <label for="number" class="form-label fw-bold">Phone Number</label>
+            <input type="Number" class="form-control" id="phonenbr" required>
+        </div>
+        <div class="mb-3">
+            <label for="card_email" class="form-label fw-bold">Email</label>
+            <input type="email" class="form-control" id="card_email" value="{{ user.email }}" required>
+        </div>
+
+        <input type="hidden" id="order_model_id" value="{{ order_model_id }}">
+        <button type="submit" class="btn btn-primary mt-3">Proceed to Payment</button>
+    </form>
+</div>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+document.getElementById('card-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+   
+  console.log("Razorpay key:", "{{ razorpay_key }}");
+
+    const name = document.getElementById('card_name').value;
+    const email = document.getElementById('card_email').value;
+    const orderModelId = document.getElementById('order_model_id').value;
+
+    const options = {
+        key: "{{ razorpay_key }}",
+        amount: "{{ amount }}",
+        currency: "INR",
+        name: "LacedUp",
+        description: "Order Payment",
+        image: "{% static 'images/favicon.ico' %}",
+        order_id: "{{ order_id }}",
+        handler: function (response) {
+            fetch("{% url 'payment_success' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: new URLSearchParams({
+                    razorpay_payment_id: response.razorpay_payment_id,
+                    razorpay_order_id: response.razorpay_order_id,
+                    razorpay_signature: response.razorpay_signature,
+                    order_model_id: orderModelId
+                })
+            })
+            .then(res => {
+                if (res.redirected) {
+                    window.location.href = res.url;
+                } else {
+                    res.text().then(text => alert(text));
+                }
+            });
+        },
+        prefill: {
+            name: name,
+            email: email
+        },
+        theme: {
+            color: "#F37254"
+        }
+    };
+
+    const rzp = new Razorpay(options);
+    rzp.open();
+});
+</script>
+{% endblock content %}
+
+
+{% comment %} {% extends 'base.html' %}
+{% load static %}
+{% block title %} Complete Payment {% endblock title %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Complete your Payment</h2>
+    <p>Order ID: {{ order_model_id }}</p>
+
+    <form id="card-form" class="bg-blur">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="card_name" class="form-label">Name on Card</label>
+            <input type="text" class="form-control" id="card_name" required>
+        </div>
+        <div class="mb-3">
+            <label for="cc_number" class="form-label">Card Number</label>
+            <input type="text" class="form-control" id="card_number" maxlength="16" required>
+        </div>
+        <div class="row">
+            <div class="col">
+                <label for="expiry" class="form-label">Expiry</label>
+                <input type="text" class="form-control" id="expiry"maxlength="5" placeholder="MM/YY" required>
+            </div>
+            <div class="col">
+                <label for="cvv" class="form-label">CVV</label>
+                <input type="password" class="form-control" maxlength="3" id="cvv" required>
+            </div>
+        </div>
+        <input type="hidden" id="order_model_id" value="{{ order_model_id }}">
+        <button type="submit" class="btn btn-primary mt-3">Proceed to Pay</button>
+    </form>
+</div>
+
+<!-- Razorpay script -->
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+document.getElementById('card-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    // Optional: Do some card field validation here
+
+    var options = {
+        "key": "{{ razorpay_key }}",
+        "amount": "{{ amount }}", // in paise
+        "currency": "INR",
+        "name": "LacedUP",
+        "description": "Order Payment",
+        "image": "{% static 'images/favicon.ico' %}",
+        "order_id": "{{ order_id }}",
+        "handler": function (response){
+            // Send the response to your Django backend
+            fetch("{% url 'payment_success' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                },
+                body: JSON.stringify({
+                    razorpay_payment_id: response.razorpay_payment_id,
+                    razorpay_order_id: response.razorpay_order_id,
+                    razorpay_signature: response.razorpay_signature,
+                    order_model_id: document.getElementById('order_model_id').value
+                })
+            }).then(res => res.json()).then(data => {
+                window.location.href = data.redirect_url || "/";
+            });
+        },
+        "prefill": {
+            "name": document.getElementById('card_name').value,
+            "email": "{{ user.email }}"
+        },
+        "theme": {
+            "color": "#F37254"
+        }
+    };
+    var rzp = new Razorpay(options);
+    rzp.open();
+});
+</script>
+{% endblock content %} {% endcomment %}
+
+
+
+{% comment %} {% extends "base.html" %}
+{% block title %}Payment{% endblock title %}
+
+{% block content %}
+<div class="container my-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white text-center">
+          <h4 class="mb-0">Payment Details</h4>
+        </div>
+        <div class="card-body">
+          <!-- No <form> tag needed since Razorpay handles payment -->
+          
+          <div class="mb-3">
+            <label for="cardName" class="form-label">Cardholder Name</label>
+            <input type="text" class="form-control" id="cardName" name="cardName" placeholder="John Doe" required />
+          </div>
+
+          <div class="mb-3">
+            <label for="cc-number" class="form-label">Card Number</label>
+            <input type="text" class="form-control" id="cc-number" name="cardNumber" placeholder="1234123412341234" maxlength="16" required />
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-6">
+              <label for="expiryDate" class="form-label">Expiry Date</label>
+              <input type="text" class="form-control" id="expiryDate" name="expiryDate" placeholder="MM/YY" maxlength="5" required />
+            </div>
+            <div class="col-6">
+              <label for="cvv" class="form-label">CVV</label>
+              <input type="password" class="form-control" id="cvv" name="cvv" placeholder="123" maxlength="3" required />
+            </div>
+          </div>
+
+          <button id="rzp-button" class="btn btn-primary w-100">Pay Now</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/inputmask/5.0.7/inputmask.min.js"></script>
+
+<script>
+  // Apply input mask to card number
+  Inputmask({
+    mask: "9999 9999 9999 9999",
+    placeholder: "1111 1111 1111 1111",
+    showMaskOnHover: false,
+    showMaskOnFocus: true,
+    clearIncomplete: true,
+  }).mask(document.getElementById('cc-number'));
+
+  document.getElementById('rzp-button').onclick = function(e) {
+    e.preventDefault();
+
+    if(document.getElementById('cardName').value.trim() === "") {
+      alert("Please enter your name");
+      return;
+    }
+
+    // Razorpay options created inside click handler to get latest input values
+    var options = {
+      "key": "{{ razorpay_key }}",
+      "amount": {{ order.amount }}, // amount in paise
+      "currency": "INR",
+      "name": "Your Company Name",
+      "description": "Test Transaction",
+      "order_id": "{{ order.order_id }}",
+      "handler": function(response) {
+        fetch("{% url 'payment_success' %}", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": "{{ csrf_token }}"
+          },
+          body: JSON.stringify({
+            order_id: response.razorpay_order_id,
+            payment_id: response.razorpay_payment_id,
+          })
+        }).then(res => res.json())
+          .then(data => {
+            alert(data.message || data.error);
+            if(data.message) {
+              window.location.href = "/order-success/";
+            }
+          }).catch(() => alert("Payment verification failed."));
+      },
+      "prefill": {
+        "name": document.getElementById('cardName').value,
+        // Add email, contact if available
+      },
+      "theme": {
+        "color": "#0d6efd"
+      }
+    };
+
+    var rzp = new Razorpay(options);
+    rzp.open();
+  };
+</script>
+
+{% endblock content %} {% endcomment %}

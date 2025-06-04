@@ -1,0 +1,224 @@
+{% extends "base.html" %} {% load static %} {% block content %}
+<h1 class="fs-1 fw-bold">"From Classics to Grails – We've Got You Laced."</h1>
+<h1 class="fs-1 fw-bold">"Get Laced. Stay Ahead."</h1>
+{% endblock content %} {% block body %}
+<!-- Portfolio Section -->
+<section id="portfolio" class="portfolio section">
+  <!-- Section Title -->
+
+  <div class="container section-title" data-aos="fade-up">
+    <h2>Welcome to LacedUp</h2>
+    <p>
+      <span>Check Our</span> <span class="description-title">Sneakers</span>
+    </p>
+  </div>
+
+  <!-- End Section Title -->
+
+  <div class="container">
+    {% for product,range,nSlides in allProds %}
+
+    <h3 class="my-3 text-center text-success bg-light">
+      {{product.0.category}} Flashsale
+    </h3>
+
+    <div class="container">
+      <div class="row">
+        {% for i in product %}
+        <div class="col-md-3 mt-2">
+          <img src="/media/{{i.image}}" class="card-img-top" alt="not found" />
+          <div class="card-body">
+            <h5 class="card-title" id="namepr{{i.id}}">{{i.product_name}}</h5>
+            <p class="card-text">{{i.desc|slice:"0.53"}}</p>
+            <h6 class="card-title mb-1">
+              Rs. <span id="pricepr{{i.id}}"> {{i.price}}</span>
+            </h6>
+            <span id="divpr{{i.id}}" class="divpr">
+              <button id="pr{{i.id}}" class="btn btn-danger cart btn-sm p-2">
+                AddToCart
+              </button>
+            </span>
+            <a href="/media/{{i.image}}"
+              ><button class="btn btn-success btn-sm cart p-2">View</button></a
+            >
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const cartBtn = document.getElementById("cart-button");
+      let cart = {};
+
+      // ✅ Safe load from localStorage
+      try {
+        const stored = localStorage.getItem("cart");
+        if (stored && stored !== "undefined") {
+          cart = JSON.parse(stored);
+        }
+      } catch (err) {
+        console.error("Failed to parse cart JSON:", err);
+        cart = {};
+        localStorage.removeItem("cart"); // Reset if corrupted
+      }
+
+      // ✅ Update cart count
+      function updateCartDisplay() {
+        if (!cartBtn) return;
+        let count = Object.values(cart).reduce((sum, [qty]) => sum + qty, 0);
+        cartBtn.innerText = `Cart (${count})`;
+      }
+
+      function getCartHTML() {
+        if (Object.keys(cart).length === 0) {
+          return "<em>Your cart is empty.</em>";
+        }
+
+        let html = "<ul class='list-group'>";
+        let total = 0;
+
+        for (let key in cart) {
+          const [qty, name, price] = cart[key];
+          const itemTotal = qty * price;
+          total += itemTotal;
+
+          html += `<li class='list-group-item d-flex justify-content-between align-items-center'>
+                  ${name} <span>x${qty} - ₹${itemTotal.toFixed(2)}</span>
+                </li>`;
+        }
+
+        html += `<li class='list-group-item text-end fw-bold'>Total: ₹${total.toFixed(
+          2
+        )}</li>`;
+        html += "</ul>";
+
+        html += `
+        <button id="clearCartBtn" class="btn btn-outline-danger btn-sm mt-2 w-100">Clear Cart</button>
+        <a href="/checkout" class="btn btn-outline-primary btn-sm mt-2 w-100">Checkout</a>
+      `;
+        return html;
+      }
+
+      // ✅ Setup popover (requires jQuery and Bootstrap JS)
+      if (typeof $ !== "undefined" && typeof $.fn.popover === "function") {
+        $(cartBtn).popover({
+          html: true,
+          content: getCartHTML,
+          trigger: "click",
+          placement: "bottom",
+          sanitize: false,
+        });
+
+        cartBtn.addEventListener("click", () => {
+          $(cartBtn)
+            .popover("dispose")
+            .popover({
+              html: true,
+              content: getCartHTML,
+              trigger: "click",
+              placement: "bottom",
+              sanitize: false,
+            })
+            .popover("show");
+        });
+      } else {
+        console.error(
+          "jQuery and Bootstrap JS not loaded — popover will not work."
+        );
+      }
+
+      // ✅ Handle clear cart
+      document.body.addEventListener("click", function (e) {
+        if (e.target.id === "clearCartBtn") {
+          localStorage.removeItem("cart");
+          cart = {};
+          updateCartDisplay();
+          if (cartBtn && $ && $.fn.popover) $(cartBtn).popover("hide");
+
+          document.querySelectorAll(".divpr").forEach((container) => {
+            const id = container.id.replace("divpr", "");
+            container.innerHTML = `<button id="pr${id}" class="btn btn-danger cart btn-sm mt-0 p-2">AddToCart</button>`;
+          });
+        }
+      });
+
+      // ✅ Add to cart / increment / decrement
+      document.querySelectorAll(".divpr").forEach((container) => {
+        container.addEventListener("click", function (e) {
+          const target = e.target;
+          let id;
+
+          if (target.classList.contains("cart")) {
+            id = target.id.toString();
+            if (cart[id]) {
+              cart[id][0] += 1;
+            } else {
+              const name = document.getElementById("name" + id).innerText;
+              const price = parseFloat(
+                document.getElementById("price" + id).innerText
+              );
+              cart[id] = [1, name, price];
+            }
+            updateCart(cart);
+          }
+
+          if (target.classList.contains("plus")) {
+            id = target.dataset.id;
+            cart["pr" + id][0] += 1;
+            updateCart(cart);
+          }
+
+          if (target.classList.contains("minus")) {
+            id = target.dataset.id;
+            cart["pr" + id][0] -= 1;
+            if (cart["pr" + id][0] <= 0) {
+              delete cart["pr" + id];
+              document.getElementById(
+                "divpr" + id
+              ).innerHTML = `<button id="pr${id}" class="btn btn-danger cart btn-sm mt-0 p-2">AddToCart</button>`;
+            }
+            updateCart(cart);
+          }
+        });
+      });
+
+      // ✅ Save and render cart
+      function updateCart(cartData) {
+        localStorage.setItem("cart", JSON.stringify(cartData));
+        updateCartDisplay();
+
+        for (let item in cartData) {
+          let qty = cartData[item][0];
+          let id = item.slice(2);
+          document.getElementById("divpr" + id).innerHTML =
+            `<button data-id="${id}" class="btn btn-warning btn-sm minus p-2">-</button>` +
+            `<span id="valpr${id}" class="mx-2">${qty}</span>` +
+            `<button data-id="${id}" class="btn btn-warning btn-sm plus p-2">+</button>`;
+        }
+      }
+      function restoreCartUI() {
+  for (let item in cart) {
+    const qty = cart[item][0];
+    const id = item.slice(2); // remove "pr" prefix
+    const container = document.getElementById("divpr" + id);
+    if (container) {
+      container.innerHTML =
+        `<button data-id="${id}" class="btn btn-warning btn-sm minus p-2">-</button>` +
+        `<span id="valpr${id}" class="mx-2 fw-bold">${qty}</span>` +
+        `<button data-id="${id}" class="btn btn-warning btn-sm plus p-2">+</button>`;
+    }
+  }
+}
+
+
+      updateCartDisplay();
+      restoreCartUI();  // Initialize display
+    });
+  </script>
+
+  {% endblock body %}
+</section>
