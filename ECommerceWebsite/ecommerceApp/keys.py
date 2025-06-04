@@ -1,0 +1,2 @@
+RAZORPAY_KEY_ID="rzp_test_adRVujrZjHFmTq"
+RAZORPAY_KEY_SECRET="CJ4KScrmle3Outr99iZnvrD2"
