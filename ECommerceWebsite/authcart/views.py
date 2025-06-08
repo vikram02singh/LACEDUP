@@ -3,19 +3,6 @@ from django.shortcuts import render ,redirect, HttpResponse
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate,login,logout
 
-# from django.core.mail import send_mail
-# from django.core.mail import EmailMessage
-# from django.conf import settings
-# # send_mail(
-#     "Subject here",
-#     "Here is the message.",
-#     "from@example.com",
-#     ["to@example.com"],
-#     fail_silently=False,
-# )
-
-
-
 def signup(request):
     if request.method=="POST":
        
@@ -33,7 +20,7 @@ def signup(request):
              pass
         user=User.objects.create_user(email,email,pass1)
         user.save()
-        # return HttpResponse("User Created ")
+        messages.success(request,"User created...Login ")
     return render(request,'signup.html')   
 def handle_login(request):
     if request.method=="POST":
