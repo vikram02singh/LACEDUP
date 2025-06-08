@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-vs1(d8@p86mvo-8h2$76+u2^l(7!u&)xukn#$tw+q8+h-6zhl3'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['ECommerceWebsite.pythonanywhere.com','localhost']
 
